@@ -31,12 +31,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "openjpeg.h"
-#ifdef WIN32
-#include "dirent.h"
+#include "../libjp3dvm/openjpeg3d.h"
+#ifdef _WIN32
+#include "windirent.h"
 #else
 #include <dirent.h>
-#endif /* WIN32 */
+#endif /* _WIN32 */
 
 
 

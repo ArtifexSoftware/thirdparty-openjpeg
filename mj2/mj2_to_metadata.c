@@ -11,12 +11,12 @@ Except for copyright, inclusion of the code within Open JPEG for distribution an
 can be bound by the Open JPEG open-source license and disclaimer, expressed elsewhere.
 */
 
-#include "opj_includes.h"
+#include "../libopenjpeg/opj_includes.h"
 #include "mj2.h"
 
 #include "mj2_to_metadata.h"
 #include <string.h>
-#include "compat/getopt.h"
+#include "getopt.h"
 
 /* -------------------------------------------------------------------------- */
 

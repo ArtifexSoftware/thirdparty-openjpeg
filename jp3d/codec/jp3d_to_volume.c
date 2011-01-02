@@ -33,14 +33,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "openjpeg.h"
+#include "../libjp3dvm/openjpeg3d.h"
 #include "getopt.h"
 #include "convert.h"
 
-#ifndef WIN32
+#ifdef _WIN32
+#include <windows.h>
+#else
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
-#endif
+#endif /* _WIN32 */
 
 /* ----------------------------------------------------------------------- */
 static double calc_PSNR(opj_volume_t *original, opj_volume_t *decoded)
@@ -196,10 +198,13 @@ int get_file_format(char *filename) {
 	int i;
 	static const char *extension[] = {"pgx", "bin", "j3d", "jp3d", "j2k", "img"};
 	static const int format[] = { PGX_DFMT, BIN_DFMT, J3D_CFMT, J3D_CFMT, J2K_CFMT, IMG_DFMT};
-	char * ext = strrchr(filename, '.') + 1;
-	for(i = 0; i < sizeof(format); i++) {
-		if(strnicmp(ext, extension[i], 3) == 0) {
-			return format[i];
+	char * ext = strrchr(filename, '.');
+	if(ext) {
+		ext++;
+		for(i = 0; i < sizeof(format) / sizeof(format[0]); i++) {
+			if(strnicmp(ext, extension[i], 3) == 0) {
+				return format[i];
+			}
 		}
 	}
 

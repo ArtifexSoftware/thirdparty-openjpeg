@@ -29,37 +29,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
 
+#ifdef _WIN32
+#include "windirent.h"
+#else
+#include <dirent.h>
+#endif /* _WIN32 */
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <strings.h>
+#define _stricmp strcasecmp
+#define _strnicmp strncasecmp
+#endif /* _WIN32 */
+
+#include "opj_config.h"
 #include "openjpeg.h"
-#include "compat/getopt.h"
+#include "getopt.h"
 #include "convert.h"
-#include "dirent.h"
 #include "index.h"
 
-#ifndef WIN32
-#define stricmp strcasecmp
-#define strnicmp strncasecmp
+#ifdef HAVE_LIBLCMS2
+#include <lcms2.h>
 #endif
+#ifdef HAVE_LIBLCMS1
+#include <lcms.h>
+#endif
+#include "color.h"
 
-/* ----------------------------------------------------------------------- */
-
-#define J2K_CFMT 0
-#define JP2_CFMT 1
-#define JPT_CFMT 2
-
-#define PXM_DFMT 10
-#define PGX_DFMT 11
-#define BMP_DFMT 12
-#define YUV_DFMT 13
-#define TIF_DFMT 14
-#define RAW_DFMT 15
-#define TGA_DFMT 16
-
-/* ----------------------------------------------------------------------- */
+#include "format_defs.h"
 
 typedef struct dircnt{
 	/** Buffer for holding images read from Directory*/
@@ -73,7 +77,7 @@ typedef struct img_folder{
 	/** The directory path of the folder containing input images*/
 	char *imgdirpath;
 	/** Output format*/
-	char *out_format;
+	const char *out_format;
 	/** Enable option*/
 	char set_imgdir;
 	/** Enable Cod Format for output*/
@@ -82,7 +86,7 @@ typedef struct img_folder{
 }img_fol_t;
 
 void decode_help_display() {
-	fprintf(stdout,"HELP\n----\n\n");
+	fprintf(stdout,"HELP for j2k_to_image\n----\n\n");
 	fprintf(stdout,"- the -h option displays this help information on screen\n\n");
 
 /* UniPG>> */
@@ -99,14 +103,14 @@ void decode_help_display() {
 	fprintf(stdout,"  -OutFor \n");
 	fprintf(stdout,"    REQUIRED only if -ImgDir is used\n");
 	fprintf(stdout,"	  Need to specify only format without filename <BMP>  \n");
-	fprintf(stdout,"    Currently accepts PGM, PPM, PNM, PGX, BMP, TIF, RAW and TGA formats\n");
+	fprintf(stdout,"    Currently accepts PGM, PPM, PNM, PGX, PNG, BMP, TIF, RAW and TGA formats\n");
 	fprintf(stdout,"  -i <compressed file>\n");
 	fprintf(stdout,"    REQUIRED only if an Input image directory not specified\n");
 	fprintf(stdout,"    Currently accepts J2K-files, JP2-files and JPT-files. The file type\n");
 	fprintf(stdout,"    is identified based on its suffix.\n");
 	fprintf(stdout,"  -o <decompressed file>\n");
 	fprintf(stdout,"    REQUIRED\n");
-	fprintf(stdout,"    Currently accepts PGM, PPM, PNM, PGX, BMP, TIF, RAW and TGA files\n");
+	fprintf(stdout,"    Currently accepts PGM, PPM, PNM, PGX, PNG, BMP, TIF, RAW and TGA files\n");
 	fprintf(stdout,"    Binary data is written to the file (not ascii). If a PGX\n");
 	fprintf(stdout,"    filename is given, there will be as many output files as there are\n");
 	fprintf(stdout,"    components: an indice starting from 0 will then be appended to the\n");
@@ -188,15 +192,15 @@ int load_images(dircnt_t *dirptr, char *imgdirpath){
 
 int get_file_format(char *filename) {
 	unsigned int i;
-	static const char *extension[] = {"pgx", "pnm", "pgm", "ppm", "bmp","tif", "raw", "tga", "j2k", "jp2", "jpt", "j2c" };
-	static const int format[] = { PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, RAW_DFMT, TGA_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT };
+	static const char *extension[] = {"pgx", "pnm", "pgm", "ppm", "bmp","tif", "raw", "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc" };
+	static const int format[] = { PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, RAW_DFMT, TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT };
 	char * ext = strrchr(filename, '.');
 	if (ext == NULL)
 		return -1;
 	ext++;
 	if(ext) {
 		for(i = 0; i < sizeof(format)/sizeof(*format); i++) {
-			if(strnicmp(ext, extension[i], 3) == 0) {
+			if(_strnicmp(ext, extension[i], 3) == 0) {
 				return format[i];
 			}
 		}
@@ -239,14 +243,14 @@ int parse_cmdline_decoder(int argc, char **argv, opj_dparameters_t *parameters,i
 		{"OutFor",REQ_ARG, NULL ,'O'},
 	};
 
-	const char optlist[] = "i:o:r:l:hx:"
+	const char optlist[] = "i:o:r:l:x:"
 
 /* UniPG>> */
 #ifdef USE_JPWL
 					"W:"
 #endif /* USE_JPWL */
 /* <<UniPG */
-					;
+			"h"		;
 	totlen=sizeof(long_option);
 	img_fol->set_out_format = 0;
 	while (1) {
@@ -286,6 +290,7 @@ int parse_cmdline_decoder(int argc, char **argv, opj_dparameters_t *parameters,i
 					case TIF_DFMT:
 					case RAW_DFMT:
 					case TGA_DFMT:
+					case PNG_DFMT:
 						break;
 					default:
 						fprintf(stderr, "Unknown output format image %s [only *.pnm, *.pgm, *.ppm, *.pgx, *.bmp, *.tif, *.raw or *.tga]!! \n", outfile);
@@ -322,6 +327,9 @@ int parse_cmdline_decoder(int argc, char **argv, opj_dparameters_t *parameters,i
 						break;
 					case TGA_DFMT:
 						img_fol->out_format = "raw";
+						break;
+					case PNG_DFMT:
+						img_fol->out_format = "png";
 						break;
 					default:
 						fprintf(stderr, "Unknown output format image %s [only *.pnm, *.pgm, *.ppm, *.pgx, *.bmp, *.tif, *.raw or *.tga]!! \n", outformat);
@@ -468,9 +476,8 @@ int parse_cmdline_decoder(int argc, char **argv, opj_dparameters_t *parameters,i
 		}
 	}else{
 		if((parameters->infile[0] == 0) || (parameters->outfile[0] == 0)) {
-			fprintf(stderr, "Error: One of the options -i or -ImgDir must be specified\n");
-			fprintf(stderr, "Error: When using -i, -o must be used\n");
-			fprintf(stderr, "usage: image_to_j2k -i *.j2k/jp2/j2c -o *.pgm/ppm/pnm/pgx/bmp/tif/raw/tga(+ options)\n");
+			fprintf(stderr, "Example: %s -i image.j2k -o image.pgm\n",argv[0]);
+			fprintf(stderr, "    Try: %s -h\n",argv[0]);
 			return 1;
 		}
 	}
@@ -548,18 +555,18 @@ int main(int argc, char **argv) {
 			dirptr->filename = (char**) malloc(num_images*sizeof(char*));
 
 			if(!dirptr->filename_buf){
-				return 0;
+				return 1;
 			}
 			for(i=0;i<num_images;i++){
 				dirptr->filename[i] = dirptr->filename_buf + i*OPJ_PATH_LEN;
 			}
 		}
 		if(load_images(dirptr,img_fol.imgdirpath)==1){
-			return 0;
+			return 1;
 		}
 		if (num_images==0){
 			fprintf(stdout,"Folder is empty\n");
-			return 0;
+			return 1;
 		}
 	}else{
 		num_images=1;
@@ -730,6 +737,21 @@ int main(int argc, char **argv) {
 		free(src);
 		src = NULL;
 
+	if(image->color_space == CLRSPC_SYCC)
+   {
+	color_sycc_to_rgb(image);
+   }
+
+	if(image->icc_profile_buf)
+   {
+#if defined(HAVE_LIBLCMS1) || defined(HAVE_LIBLCMS2)
+	color_apply_icc_profile(image);
+#endif
+
+	free(image->icc_profile_buf);
+	image->icc_profile_buf = NULL; image->icc_profile_len = 0;
+   }
+
 		/* create output image */
 		/* ------------------- */
 		switch (parameters.cod_format) {
@@ -759,7 +781,7 @@ int main(int argc, char **argv) {
 				fprintf(stdout,"Generated Outfile %s\n",parameters.outfile);
 			}
 			break;
-
+#ifdef HAVE_LIBTIFF
 		case TIF_DFMT:			/* TIFF */
 			if(imagetotif(image, parameters.outfile)){
 				fprintf(stdout,"Outfile %s not generated\n",parameters.outfile);
@@ -768,7 +790,7 @@ int main(int argc, char **argv) {
 				fprintf(stdout,"Generated Outfile %s\n",parameters.outfile);
 			}
 			break;
-
+#endif /* HAVE_LIBTIFF */
 		case RAW_DFMT:			/* RAW */
 			if(imagetoraw(image, parameters.outfile)){
 				fprintf(stdout,"Error generating raw file. Outfile %s not generated\n",parameters.outfile);
@@ -786,6 +808,21 @@ int main(int argc, char **argv) {
 				fprintf(stdout,"Successfully generated Outfile %s\n",parameters.outfile);
 			}
 			break;
+#ifdef HAVE_LIBPNG
+		case PNG_DFMT:			/* PNG */
+			if(imagetopng(image, parameters.outfile)){
+				fprintf(stdout,"Error generating png file. Outfile %s not generated\n",parameters.outfile);
+			}
+			else {
+				fprintf(stdout,"Successfully generated Outfile %s\n",parameters.outfile);
+			}
+			break;
+#endif /* HAVE_LIBPNG */
+/* Can happen if output file is TIFF or PNG
+ * and HAVE_LIBTIF or HAVE_LIBPNG is undefined
+*/
+			default:
+				fprintf(stderr,"Outfile %s not generated\n",parameters.outfile);
 		}
 
 		/* free remaining structures */

@@ -26,7 +26,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "opj_includes.h"
+#include "../libopenjpeg/opj_includes.h"
 #include "mj2.h"
 
 /*  -----------------------	      */
@@ -324,8 +324,6 @@ int imagetobmp(opj_image_t * img, char *outfile) {
       }
     }
     fclose(f);
-    opj_free(img->comps[1].data);
-    opj_free(img->comps[2].data);
   }
   return 0;
 }

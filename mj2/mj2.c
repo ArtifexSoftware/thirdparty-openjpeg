@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "opj_includes.h"
+#include "../libopenjpeg/opj_includes.h"
 #include "mj2.h"
 
 /** @defgroup JP2 JP2 - JPEG-2000 file format reader/writer */
@@ -42,8 +42,9 @@ Read box headers
 @param box
 @return Returns true if successful, returns false otherwise
 */
+/*-- UNUSED
 static bool jp2_read_boxhdr(opj_common_ptr cinfo, opj_cio_t *cio, opj_jp2_box_t *box);
-
+--*/
 /*
 * 
 * Read box headers
@@ -269,7 +270,8 @@ void mj2_stsc_decompact(mj2_tk_t * tk)
       tk->chunk[k].num_samples =
 				tk->sampletochunk[tk->num_samplestochunk - 1].samples_per_chunk;
     }
-    tk->chunk = opj_realloc(tk->chunk, tk->num_chunks * sizeof(mj2_chunk_t));
+    tk->chunk = (mj2_chunk_t*)
+	 opj_realloc(tk->chunk, tk->num_chunks * sizeof(mj2_chunk_t));
   }
   
 }
@@ -1099,6 +1101,7 @@ int mj2_read_smj2(opj_image_t * img, mj2_tk_t * tk, opj_cio_t *cio)
   mj2_box_t box;
   mj2_box_t box2;
   int i;
+  opj_jp2_color_t color;
 	
   mj2_read_boxhdr(&box, cio);
 	
@@ -1156,14 +1159,15 @@ int mj2_read_smj2(opj_image_t * img, mj2_tk_t * tk, opj_cio_t *cio)
   tk->or_fieldorder = 0;
 	
   cio_skip(cio,2);			/* Pre-defined = -1 */
+  memset(&color, 0, sizeof(opj_jp2_color_t));
 	
-  if (!jp2_read_jp2h(&tk->jp2_struct, cio)) {
+  if (!jp2_read_jp2h(&tk->jp2_struct, cio, &color)) {
 		opj_event_msg(tk->cinfo, EVT_ERROR, "Error reading JP2H Box\n");
     return 1;
   }
 
   tk->jp2_struct.comps = (opj_jp2_comps_t*) opj_malloc(tk->jp2_struct.numcomps * sizeof(opj_jp2_comps_t));
-  tk->jp2_struct.cl = (int*) opj_malloc(sizeof(int));
+  tk->jp2_struct.cl = (unsigned int*) opj_malloc(sizeof(unsigned int));
 
   tk->num_br = 0;
   tk->num_jp2x = 0;
@@ -2604,13 +2608,13 @@ int mj2_read_moov(opj_mj2_t * movie, opj_image_t * img, opj_cio_t *cio)
 int mj2_read_struct(FILE *file, opj_mj2_t *movie) {
   mj2_box_t box;
   opj_image_t img;
-  char * src;
+  unsigned char * src;
   int fsresult;
   int foffset;
 	opj_cio_t *cio;
 	
 	/* open a byte stream for reading */	
-	src = (char*) opj_malloc(300 * sizeof(char));	
+	src = (unsigned char*) opj_malloc(300 * sizeof(unsigned char));	
 
 	/* Assuming that jp and ftyp markers size do
      not exceed 300 bytes */
@@ -2694,7 +2698,7 @@ int mj2_read_struct(FILE *file, opj_mj2_t *movie) {
   }	
 
   fseek(file,foffset,SEEK_SET);
-  src = opj_realloc(src,box.length);
+  src = (unsigned char*)opj_realloc(src,box.length);
   fsresult = fread(src,box.length,1,file);
   if (fsresult != 1) {
     opj_event_msg(cio->cinfo, EVT_ERROR, "End of file reached while trying to read MOOV box\n"); 
@@ -2738,7 +2742,8 @@ void mj2_setup_decoder(opj_mj2_t *movie, mj2_dparameters_t *mj2_parameters) {
   movie->num_htk=0;	
 
 	/* setup the J2K decoder parameters */
-	j2k_setup_decoder(movie->cinfo->j2k_handle, &mj2_parameters->j2k_parameters);
+	j2k_setup_decoder((opj_j2k_t*)movie->cinfo->j2k_handle, 
+		&mj2_parameters->j2k_parameters);
 
 }
 
@@ -2846,7 +2851,7 @@ void mj2_setup_encoder(opj_mj2_t *movie, mj2_cparameters_t *parameters) {
 		jp2_struct->brand = JP2_JP2;	/* BR         */
 		jp2_struct->minversion = 0;	/* MinV       */
 		jp2_struct->numcl = 1;
-		jp2_struct->cl = (unsigned int*) opj_malloc(jp2_struct->numcl * sizeof(int));
+		jp2_struct->cl = (unsigned int*) opj_malloc(jp2_struct->numcl * sizeof(unsigned int));
 		jp2_struct->cl[0] = JP2_JP2;	/* CL0 : JP2  */		
 		jp2_struct->C = 7;      /* C : Always 7*/
 		jp2_struct->UnkC = 0;      /* UnkC, colorspace specified in colr box*/

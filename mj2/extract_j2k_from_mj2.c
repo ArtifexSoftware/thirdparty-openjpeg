@@ -31,8 +31,8 @@
 #include <string.h>
 
 #include "openjpeg.h"
-#include "j2k.h"
-#include "jp2.h"
+#include "../libopenjpeg/j2k.h"
+#include "../libopenjpeg/jp2.h"
 #include "mj2.h"
 
 /* -------------------------------------------------------------------------- */
@@ -76,8 +76,8 @@ int main(int argc, char *argv[]) {
 	mj2_dparameters_t parameters;
 
   if (argc != 3) {
-    printf("Bad syntax: Usage: MJ2_extractor mj2filename output_location\n"); 
-    printf("Example: MJ2_extractor foreman.mj2 output/foreman\n");
+    printf("Usage: %s mj2filename output_location\n",argv[0]); 
+    printf("Example: %s foreman.mj2 output/foreman\n",argv[0]);
     return 1;
   }
   
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 	/* setup the decoder decoding parameters using user parameters */
 	movie = (opj_mj2_t*) dinfo->mj2_handle;
-	mj2_setup_decoder(dinfo->mj2_handle, &parameters);
+	mj2_setup_decoder((opj_mj2_t*)dinfo->mj2_handle, &parameters);
 
   if (mj2_read_struct(file, movie)) // Creating the movie structure
     return 1;

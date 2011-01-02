@@ -37,31 +37,17 @@
 #include <math.h>
 
 #include "openjpeg.h"
-#include "compat/getopt.h"
+#include "getopt.h"
 #include "convert.h"
 #include "dirent.h"
 #include "org_openJpeg_OpenJPEGJavaDecoder.h"
 
-#ifndef WIN32
+#ifndef _WIN32
 #define stricmp strcasecmp
 #define strnicmp strncasecmp
 #endif
 
-/* ----------------------------------------------------------------------- */
-
-#define J2K_CFMT 0
-#define JP2_CFMT 1
-#define JPT_CFMT 2
-
-#define PXM_DFMT 10
-#define PGX_DFMT 11
-#define BMP_DFMT 12
-#define YUV_DFMT 13
-#define TIF_DFMT 14
-#define RAW_DFMT 15
-#define TGA_DFMT 16
-
-/* ----------------------------------------------------------------------- */
+#include "format_defs.h"
 
 typedef struct callback_variables {
 	JNIEnv *env;
@@ -782,13 +768,13 @@ JNIEXPORT jint JNICALL Java_org_openJpeg_OpenJPEGJavaDecoder_internalDecodeJ2Kto
 			ptr2 = image->comps[2].data;
 #ifdef CHECK_THRESHOLDS 
 			if (image->comps[0].sgnd) {
-				min_value = 0;
-				max_value = 255;
-			} else {
 				min_value = -128;
 				max_value = 127;
+			} else {
+				min_value = 0;
+				max_value = 255;
 			}
-#endif
+#endif			
 			// Get the pointer to the Java structure where the data must be copied
 			fid = (*env)->GetFieldID(env, cls,"image24", "[I");
 			jia = (*env)->GetObjectField(env, obj, fid);
@@ -828,13 +814,13 @@ JNIEXPORT jint JNICALL Java_org_openJpeg_OpenJPEGJavaDecoder_internalDecodeJ2Kto
 				ptrBBody = jbBody;
 #ifdef CHECK_THRESHOLDS 
 				if (image->comps[0].sgnd) {
-					min_value = 0;
-					max_value = 255;
-				} else {
 					min_value = -128;
 					max_value = 127;
+				} else {
+					min_value = 0;
+					max_value = 255;
 				}
-#endif				
+#endif								
 				//printf("C: transfering %d shorts to Java image8 pointer = %d\n", wr*hr,ptrSBody);
 				for (i=0; i<w*h; i++) {
 					tempUC = (unsigned char) (ptr[i]);
@@ -855,11 +841,11 @@ JNIEXPORT jint JNICALL Java_org_openJpeg_OpenJPEGJavaDecoder_internalDecodeJ2Kto
 				ptrSBody = jsBody;
 #ifdef CHECK_THRESHOLDS 
 				if (image->comps[0].sgnd) {
-					min_value = 0;
-					max_value = 65535;
-				} else {
 					min_value = -32768;
 					max_value = 32767;
+				} else {
+					min_value = 0;
+					max_value = 65535;
 				}
 				printf("C: minValue = %d, maxValue = %d\n", min_value, max_value);
 #endif				

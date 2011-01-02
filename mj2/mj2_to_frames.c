@@ -29,13 +29,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "opj_config.h"
 #include "openjpeg.h"
-#include "j2k_lib.h"
-#include "j2k.h"
-#include "jp2.h"
+#include "../libopenjpeg/j2k_lib.h"
+#include "../libopenjpeg/j2k.h"
+#include "../libopenjpeg/jp2.h"
 #include "mj2.h"
 #include "mj2_convert.h"
 
+#ifdef HAVE_LIBLCMS2
+#include <lcms2.h>
+#endif
+#ifdef HAVE_LIBLCMS1
+#include <lcms.h>
+#endif
+#include "color.h"
 /* -------------------------------------------------------------------------- */
 
 /**
@@ -81,8 +89,7 @@ int main(int argc, char *argv[]) {
 	unsigned int numframes = 0;
 			
   if (argc != 3) {
-    printf("Bad syntax: Usage: mj2_to_frames inputfile.mj2 outputfile.yuv\n"); 
-    printf("Example: MJ2_decoder foreman.mj2 foreman.yuv\n");
+    printf("Usage: %s inputfile.mj2 outputfile.yuv\n",argv[0]); 
     return 1;
   }
   
@@ -112,7 +119,7 @@ int main(int argc, char *argv[]) {
 	
 	/* get a MJ2 decompressor handle */
 	dinfo = mj2_create_decompress();
-	movie = dinfo->mj2_handle;
+	movie = (opj_mj2_t*)dinfo->mj2_handle;
 	
 	/* catch events using our callbacks and give a local context */
 	opj_set_event_mgr((opj_common_ptr)dinfo, &event_mgr, stderr);		
@@ -121,7 +128,7 @@ int main(int argc, char *argv[]) {
 	opj_set_default_decoder_parameters(&mj2_parameters.j2k_parameters);
 	
 	/* setup the decoder decoding parameters using user parameters */
-	mj2_setup_decoder(dinfo->mj2_handle, &mj2_parameters);
+	mj2_setup_decoder((opj_mj2_t*)dinfo->mj2_handle, &mj2_parameters);
 			
   if (mj2_read_struct(file, movie)) // Creating the movie structure
     return 1;	
@@ -156,7 +163,8 @@ int main(int argc, char *argv[]) {
     sample = &track->sample[snum];
 		if (sample->sample_size-8 > max_codstrm_size) {
 			max_codstrm_size =  sample->sample_size-8;
-			if ((frame_codestream = realloc(frame_codestream, max_codstrm_size)) == NULL) {
+			if ((frame_codestream = (unsigned char*)
+				realloc(frame_codestream, max_codstrm_size)) == NULL) {
 				printf("Error reallocation memory\n");
 				return 1;
 			}; 		
@@ -168,7 +176,24 @@ int main(int argc, char *argv[]) {
 		cio = opj_cio_open((opj_common_ptr)dinfo, frame_codestream, sample->sample_size-8);
 		
 		img = opj_decode(dinfo, cio); // Decode J2K to image
-				
+
+#ifdef WANT_SYCC_TO_RGB
+	if(img->color_space == CLRSPC_SYCC)
+  {
+	color_sycc_to_rgb(img);
+  }
+#endif
+
+	if(img->icc_profile_buf)
+  {
+#if defined(HAVE_LIBLCMS1) || defined(HAVE_LIBLCMS2)
+	color_apply_icc_profile(img);
+#endif
+
+	free(img->icc_profile_buf);
+	img->icc_profile_buf = NULL; img->icc_profile_len = 0;
+  }
+
     if (((img->numcomps == 3) && (img->comps[0].dx == img->comps[1].dx / 2) 
       && (img->comps[0].dx == img->comps[2].dx / 2 ) && (img->comps[0].dx == 1)) 
       || (img->numcomps == 1)) {
@@ -182,7 +207,7 @@ int main(int argc, char *argv[]) {
     {
       fprintf(stdout,"The frames will be output in a bmp format (output_1.bmp, ...)\n");
       sprintf(outfilename,"output_%d.bmp",snum);
-      if (imagetobmp(img, outfilename))	// Convert image to YUV
+      if (imagetobmp(img, outfilename))	// Convert image to BMP
 				return 1;
       
     }

@@ -28,11 +28,13 @@
 
 #include "fix.h"
 
-#ifdef WIN32
+#ifdef _WIN32
+#include <windows.h>
+
 #define int64 __int64
 #else
 #define int64 long long
-#endif
+#endif /* _WIN32 */
 
 /// <summary>
 /// Multiply two fixed-precision rational numbers.
