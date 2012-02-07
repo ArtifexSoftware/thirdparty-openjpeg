@@ -1,28 +1,75 @@
-#OpenJPEG top source directory
-SUBDIRS = libopenjpeg codec mj2 @jpwl_dir@ @jp3d_dir@ doc
+DISTCHECK_CONFIGURE_FLAGS = --enable-jpip=yes --enable-jpip-server=yes --enable-jpwl=yes --enable-mj2=yes
 
-clean-local:
-	@rm -rf bin
-	@l='$(SUBDIRS)'; for f in $$l ; do \
-	rm -f $$f/.report.txt ; \
-	done
+ACLOCAL_AMFLAGS = -I m4
 
-distclean-local: clean-local
+SUBDIRS = libopenjpeg applications doc
 
-pkgconf_dir = /usr/lib/pkgconfig
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libopenjpeg1.pc
+
+if WANT_JPWL
+pkgconfig_DATA += libopenjpeg-jpwl.pc
+endif
+
+
+MAINTAINERCLEANFILES = \
+Makefile.in \
+aclocal.m4 \
+config.guess \
+opj_config.h.in \
+opj_config.h.in~ \
+config.sub \
+configure \
+depcomp \
+install-sh \
+ltmain.sh \
+missing
+
+EXTRA_DIST = \
+CMake/CTestCustom.cmake.in \
+CMake/FindFCGI.cmake \
+CMake/FindLCMS2.cmake \
+CMake/FindLCMS.cmake \
+CMake/OpenJPEGConfig.cmake.in \
+CMakeLists.txt \
+CTestConfig.cmake \
+AUTHORS \
+CHANGES \
+INSTALL \
+LICENSE \
+NEWS \
+README \
+THANKS \
+bootstrap.sh \
+libopenjpeg1.pc.cmake \
+libopenjpeg1.pc.in \
+libopenjpeg-jpwl.pc.in \
+opj_config.h.cmake.in \
+m4/opj_check_lib.m4 \
+m4/opj_doxygen.m4 \
+m4/pkg.m4
+
+.PHONY: doc
+
+# Documentation
+
+doc:
+	@echo "entering doc/"
+	@cd doc && make doc
 
 install-data-hook:
-	@echo ""
-	@l='$(SUBDIRS)'; for f in $$l ; do \
-	cat $$f/.report.txt ; \
-	done
-	@echo ""
-	@echo "Installing: libopenjpeg1.pc $(pkgconf_dir)"
-	@echo ""
-	@$(INSTALL) -d $(pkgconf_dir)
-	@cp libopenjpeg.pc $(pkgconf_dir)/libopenjpeg1.pc
-	@(cd $(pkgconf_dir) && $(RM) libopenjpeg.pc && \
-	$(LN_S) libopenjpeg1.pc libopenjpeg.pc)
+if HAVE_WIN32
+	$(LN_S) -f libopenjpeg1.pc $(DESTDIR)$(pkgconfigdir)/libopenjpeg.pc
+else
+	$(LN_S) -nf libopenjpeg1.pc $(DESTDIR)$(pkgconfigdir)/libopenjpeg.pc
+endif
+	@echo -e " (PC)\t$(pkgconfigdir)/libopenjpeg1.pc" >> $(top_builddir)/report.txt
+	@echo -e " (LN)\t$(pkgconfigdir)/libopenjpeg.pc" >> $(top_builddir)/report.txt
+if WANT_JPWL
+	@echo -e " (PC)\t$(pkgconfigdir)/libopenjpeg-jpwl.pc" >> $(top_builddir)/report.txt
+endif
+	@cat $(top_builddir)/report.txt
+	@rm $(top_builddir)/report.txt
 
 uninstall-hook:
-	@(cd $(pkgconf_dir) && $(RM) libopenjpeg.pc libopenjpeg1.pc)
+	rm -f $(DESTDIR)$(pkgconfigdir)/libopenjpeg.pc

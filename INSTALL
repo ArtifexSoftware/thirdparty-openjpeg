@@ -5,36 +5,58 @@ How to build and install openjpeg binaries
 UNIX/LINUX similar systems
 --------------------------
 
-1) Using configure tools
+1) Using autotools
 
-You can simply type
-  ./configure [--prefix=/path]
+It is highly recommended that pkg-config is installed. If needed, you have to
+properly set the environment variable PKG_CONFIG_PATH so that the .pc files
+are found.
+
+To build from top-level directory, you can simply type: 
+  ./bootstrap.sh
+  ./configure
   make
 
-If you are root:
-  make install
-  make clean
-  make distclean
+To keep all build files in a separate directory, you can type instead: 
+  ./bootstrap.sh
+  mkdir build
+  cd build
+  ../configure
+  make
 
-else:
+To install:
   sudo make install
+  
+To clean:
   make clean
   make distclean
 
-Binaries are located in the 'bin' directory.
+To build doc (requires 'doxygen' to be found on your system):
+(this will create an html directory in TOP_LEVEL/doc)
+  make doc
 
-If 'configure' does not work on your system please
-call './bootstrap.sh'.
+Main './configure' options (type './configure --help' for more details)
+  '--enable-mj2'
+  '--enable-jpwl'
+  '--enable-jpip'
+  '--prefix=/path/to/install/directory' (example : '--prefix=$PWD/installed')
+  '--enable-debug' (default : disabled)
 
-If 'configure' does not find a library or header file,
-or to see available configure options, please try 
-'./configure --help'.
+You can also specify your own CFLAGS and LDFLAGS with (for example):
+  CFLAGS="-O3 -pipe" LDFLAGS="-Wl,-s" ./configure
 
-Note: if Doxygen is found on your system, a target 'docs'
-will automatically be created in 'doc/Makefile'. To build
-the documentation (it will create an 'html' directory):
-  cd doc
-	make docs
+The (optional) dependencies of some binaries are libpng, libtiff, libcms 1 or 2
+and FastCGI. Only libtiff and FastCGI have no .pc file. There should be some
+automatic detection if they are installed in /usr, /usr/local or /opt/local.
+Otherwise, you can tune their detection (as well as for libpng and libcms1 or 2
+too) with the environment variables:
+
+TIFF_CFLAGS
+TIFF_LIBS
+FCGI_CFLAGS
+FCGI_LIBS
+
+See './configure --help' output for more details.
+
 
 2) Using cmake (see www.cmake.org)
 
@@ -49,6 +71,10 @@ If you are root:
 else:
   sudo make install
   make clean
+  
+To build the Doxygen documentation (Doxygen needs to be found on the system):
+(A 'html' directory is generated in the 'doc' directory)
+  make doc
 
 Binaries are located in the 'bin' directory.
 
@@ -59,47 +85,29 @@ Main available cmake flags:
 * To build the CODEC executables: '-DBUILD_CODEC:bool=on' (default: 'ON')
 * To build the MJ2 executables: '-DBUILD_MJ2:bool=on' (default: 'OFF')
 * To build the JPWL executables and JPWL library: '-DBUILD_JPWL:bool=on' (default: 'OFF')
-* To build the JP3D executables and JP3D library: '-DBUILD_JP3D:bool=on' (default: 'OFF')
-* [WIN32 ONLY] To build the INDEXER_JPIP executable: '-DBUILD_INDEXER_JPIP:bool=on' (default: 'OFF')
-* To build the doxygen documentation: '-DBUILD_DOC:bool=on' (default: 'OFF')
+* To build the JPIP library and utilities: '-DBUILD_JPIP:bool=on' (default: 'OFF')
 * To enable testing (and automatic result upload to http://my.cdash.org/index.php?project=OPENJPEG):
-    cmake . -DBUILD_TESTING:BOOL=ON -DJPEG2000_CONFORMANCE_DATA_ROOT:PATH=/path/to/your/JPEG2000/test/files
+    cmake . -DBUILD_TESTING:BOOL=ON -DOPJ_DATA_ROOT:PATH='path/to/the/data/directory'
     make
     make Experimental
-  Note : JPEG2000 test files are available here : http://www.crc.ricoh.com/~gormish/jpeg2000conformance/
-
-3) Manually using Makefile.nix:
-- Manually edit the config.nix file
-- Manually create an opj_config.h file from opj_config.h.in.user
-  and edit this opj_config.h
-- Then : (if 'WITH_JPWL' and/or 'WITH_JP3D' are defined in config.nix)
-    make -f Makefile.nix all
-    make -f Makefile.nix install
-    make -f Makefile.nix clean
-    make -f Makefile.nix uninstall
-- If neither 'WITH_JPWL' nor 'WITH_JP3D' is defined in config.nix
-  and you want to clean/compile/install/uninstall JPWL/JP3D:
-  call the respective target in the respective directory.
+  Note : JPEG2000 test files are available with 'svn checkout http://openjpeg.googlecode.com/svn/data' (about 70 Mo).
+  If '-DOPJ_DATA_ROOT:PATH' option is omitted, test files will be automatically searched in '${CMAKE_SOURCE_DIR}/../data',
+  corresponding to the location of the data directory when compiling from the trunk (and assuming the data directory has
+  been checked out of course).
 
 MACOSX
 ------
 
-The same building procedures as above will soon be available for MACOSX.
-The xcode project file has also to be updated.
-Right now, the CMake procedure is the only one working. Please refer to instructions above.
+The same building procedures as above (autotools and cmake) work for MACOSX.
+The xcode project file can also be used.
+
 If it does not work, try adding the following flag to the cmake command : 
   '-DCMAKE_OSX_ARCHITECTURES:STRING=i386'
 
 WINDOWS
 -------
 
-If you're using cygwin, the same procedures as for Unix should work. Otherwise:
+If you're using cygwin or MinGW+MSYS, the same procedures as for Unix can be used. 
 
-1) Using cmake to generate project files
-
-Use the cmake procedure above with the '-G <generator-name>' flag to generate the project
-files for the IDE you are using. Type 'cmake --help' for available generators on your platform.
-
-2) Using the provided project files
-
-These files are obsolete and will be updated soon.
+Otherwise you can use cmake to generate project files for the IDE you are using (VC2010, etc).
+Type 'cmake --help' for available generators on your platform.
