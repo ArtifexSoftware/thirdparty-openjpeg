@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Mickael Savinaud, Communications & Systemes <mickael.savinaud@c-s.fr>
+ * Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ void comparePGXimages_help_display(void) {
 /*******************************************************************************
  * Parse command line
  *******************************************************************************/
-int parse_cmdline_cmp(int argc, char **argv, test_cmp_parameters* param)
+static int parse_cmdline_cmp(int argc, char **argv, test_cmp_parameters* param)
 {
   char *MSElistvalues = NULL;  char *PEAKlistvalues= NULL;
   char *separatorList = NULL;
@@ -332,7 +332,7 @@ double* parseToleranceValues( char* inArg, const int nbcomp)
  * Create filenames from a filename by used separator and nb components
  * (begin to 0)
  *******************************************************************************/
-char* createMultiComponentsFilename(const char* inFilename, const int indexF, const char* separator)
+static char* createMultiComponentsFilename(const char* inFilename, const int indexF, const char* separator)
 {
   char s[255];
   char *outFilename, *ptr;
@@ -446,7 +446,7 @@ opj_image_t* readImageFromFilePGX(char* filename, int nbFilenamePGX, char *separ
     free(filenameComponentPGX);
     }
 
-  image = opj_image_create(nbFilenamePGX, param_image_read, CLRSPC_UNSPECIFIED);
+  image = opj_image_create(nbFilenamePGX, param_image_read, OPJ_CLRSPC_UNSPECIFIED);
   for (it_file = 0; it_file < nbFilenamePGX; it_file++)
     {
     /* Copy data into output image and free memory*/
@@ -480,7 +480,7 @@ int imageToPNG(const opj_image_t* image, const char* filename, int num_comp_sele
   param_image_write.prec = image->comps[num_comp_select].prec;
   param_image_write.sgnd = image->comps[num_comp_select].sgnd;
 
-  image_write = opj_image_create(1, &param_image_write, CLRSPC_GRAY);
+  image_write = opj_image_create(1, &param_image_write, OPJ_CLRSPC_GRAY);
   memcpy(image_write->comps->data, image->comps[num_comp_select].data, param_image_write.h * param_image_write.w * sizeof(int));
 
   imagetopng(image_write, filename);
@@ -497,7 +497,7 @@ int imageToPNG(const opj_image_t* image, const char* filename, int num_comp_sele
 int main(int argc, char **argv)
 {
   test_cmp_parameters inParam;
-  int it_comp, itpxl;
+  OPJ_UINT32 it_comp, itpxl;
   int failed = 0;
   int nbFilenamePGXbase, nbFilenamePGXtest;
   char *filenamePNGtest= NULL, *filenamePNGbase = NULL, *filenamePNGdiff = NULL;
@@ -531,7 +531,8 @@ int main(int argc, char **argv)
          inParam.nr_flag, inParam.separator_base, inParam.separator_test);
 
   if ( (inParam.tabMSEvalues != NULL) && (inParam.tabPEAKvalues != NULL))
-  {
+    {
+    int it_comp;
     printf(" MSE values = [");
     for (it_comp = 0; it_comp < inParam.nbcomp; it_comp++)
       printf(" %f ", inParam.tabMSEvalues[it_comp]);
@@ -594,7 +595,6 @@ int main(int argc, char **argv)
     }
   else
     {
-	if (imageBase) opj_image_destroy(imageBase);
     if (inParam.tabMSEvalues) free(inParam.tabMSEvalues);
     if (inParam.tabPEAKvalues) free(inParam.tabPEAKvalues);
     if (inParam.base_filename) free(inParam.base_filename);
@@ -678,7 +678,7 @@ int main(int argc, char **argv)
      return EXIT_FAILURE;
      }
 
-   imageDiff = opj_image_create(imageBase->numcomps, param_image_diff, CLRSPC_UNSPECIFIED);
+   imageDiff = opj_image_create(imageBase->numcomps, param_image_diff, OPJ_CLRSPC_UNSPECIFIED);
    /* Free memory*/
    free(param_image_diff);
 

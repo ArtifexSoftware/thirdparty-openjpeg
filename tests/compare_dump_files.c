@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Mickael Savinaud, Communications & Systemes <mickael.savinaud@c-s.fr>
+ * Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +50,7 @@ typedef struct test_cmp_parameters
 /*******************************************************************************
  * Command line help function
  *******************************************************************************/
-void compare_dump_files_help_display(void) {
+static void compare_dump_files_help_display(void) {
   fprintf(stdout,"\nList of parameters for the compare_dump_files function  \n");
   fprintf(stdout,"\n");
   fprintf(stdout,"  -b \t REQUIRED \t filename to the reference/baseline dump file \n");
@@ -60,7 +60,7 @@ void compare_dump_files_help_display(void) {
 /*******************************************************************************
  * Parse command line
  *******************************************************************************/
-int parse_cmdline_cmp(int argc, char **argv, test_cmp_parameters* param)
+static int parse_cmdline_cmp(int argc, char **argv, test_cmp_parameters* param)
 {
   int sizemembasefile, sizememtestfile;
   int index;
