@@ -1,5 +1,5 @@
 /*
- * $Id: auxtrans_manager.c 2215 2012-11-15 19:18:43Z savmickael $
+ * $Id$
  *
  * Copyright (c) 2002-2011, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2011, Professor Benoit Macq

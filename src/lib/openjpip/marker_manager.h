@@ -1,5 +1,5 @@
 /*
- * $Id: marker_manager.h 2175 2012-10-29 14:35:11Z mathieu.malaterre $
+ * $Id$
  *
  * Copyright (c) 2002-2011, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2011, Professor Benoit Macq

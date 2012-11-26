@@ -1,5 +1,5 @@
 /*
- * $Id: channel_manager.c 2061 2012-10-08 15:59:17Z mathieu.malaterre $
+ * $Id$
  *
  * Copyright (c) 2002-2011, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2011, Professor Benoit Macq

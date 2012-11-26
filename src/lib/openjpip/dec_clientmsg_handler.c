@@ -1,5 +1,5 @@
 /*
- * $Id: dec_clientmsg_handler.c 2180 2012-10-29 16:24:39Z mathieu.malaterre $
+ * $Id$
  *
  * Copyright (c) 2002-2011, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2011, Professor Benoit Macq
