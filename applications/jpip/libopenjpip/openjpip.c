@@ -1,5 +1,5 @@
 /*
- * $Id: openjpip.c 1364 2012-01-30 09:55:05Z mathieu.malaterre $
+ * $Id: openjpip.c 1480 2012-03-01 20:58:29Z mathieu.malaterre $
  *
  * Copyright (c) 2002-2011, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2011, Professor Benoit Macq
@@ -115,7 +115,7 @@ bool process_JPIPrequest( server_record_t *rec, QR_t *qr)
     if( !close_channel( *(qr->query), rec->sessionlist, &cursession, &curchannel))
       return false;
   
-  if( (qr->query->fx > 0 && qr->query->fy > 0) || qr->query->box_type[0][0] != 0)
+  if( (qr->query->fx > 0 && qr->query->fy > 0) || qr->query->box_type[0][0] != 0 || qr->query->len > 0)
     if( !gene_JPIPstream( *(qr->query), target, cursession, curchannel, &qr->msgqueue))
       return false;
 
@@ -141,25 +141,29 @@ void send_responsedata( server_record_t *rec, QR_t *qr)
   recons_stream_from_msgqueue( qr->msgqueue, fd);
   
   add_EORmsg( fd, qr); /* needed at least for tcp and udp */
-
+  
   len_of_jpipstream = get_filesize( fd);
   jpipstream = fetch_bytes( fd, 0, len_of_jpipstream);
-
+  
   close( fd);
   remove( tmpfname);
 
   fprintf( FCGI_stdout, "\r\n");
 
-  if( qr->channel)
-    if( qr->channel->aux == tcp || qr->channel->aux == udp){
-      send_responsedata_on_aux( qr->channel->aux==tcp, rec->auxtrans, qr->channel->cid, jpipstream, len_of_jpipstream, 1000); /* 1KB per frame*/
-      return;
-    }
-  
-  if( fwrite( jpipstream, len_of_jpipstream, 1, FCGI_stdout) != 1)
-    fprintf( FCGI_stderr, "Error: failed to write jpipstream\n");
+  if( len_of_jpipstream){
+    
+    if( qr->channel)
+      if( qr->channel->aux == tcp || qr->channel->aux == udp){
+	send_responsedata_on_aux( qr->channel->aux==tcp, rec->auxtrans, qr->channel->cid, jpipstream, len_of_jpipstream, 1000); /* 1KB per frame*/
+	return;
+      }
+    
+    if( fwrite( jpipstream, len_of_jpipstream, 1, FCGI_stdout) != 1)
+      fprintf( FCGI_stderr, "Error: failed to write jpipstream\n");
+  }
 
   free( jpipstream);
+
   return;
 }
 
@@ -179,7 +183,7 @@ void add_EORmsg( int fd, QR_t *qr)
 void end_QRprocess( server_record_t *rec, QR_t **qr)
 {
   /* TODO: record client preferences if necessary*/
-  
+  (void)rec; /* unused */
   delete_query( &((*qr)->query));
   delete_msgqueue( &((*qr)->msgqueue));
   free( *qr);

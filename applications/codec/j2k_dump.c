@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 20010, Mathieu Malaterre, GDCM
+ * Copyright (c) 2010, Mathieu Malaterre, GDCM
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -274,12 +274,12 @@ int parse_cmdline_decoder(int argc, char **argv, opj_dparameters_t *parameters,i
 			fprintf(stderr, "Only one format allowed! Valid format PGM, PPM, PNM, PGX, BMP, TIF, RAW and TGA!!\n");
 			return 1;
 		}
-		if(!((parameters->outfile[0] == 0))){
+		if(!(parameters->outfile[0] == 0)){
 			fprintf(stderr, "Error: options -ImgDir and -o cannot be used together !!\n");
 			return 1;
 		}
 	}else{
-		if((parameters->infile[0] == 0) ) {
+		if( parameters->infile[0] == 0 ) {
 			fprintf(stderr, "Example: %s -i image.j2k\n",argv[0]);
 			fprintf(stderr, "    Try: %s -h\n",argv[0]);
 			return 1;

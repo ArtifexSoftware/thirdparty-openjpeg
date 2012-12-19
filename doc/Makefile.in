@@ -237,7 +237,7 @@ top_srcdir = @top_srcdir@
 MAINTAINERCLEANFILES = Makefile.in
 PACKAGE_DOCNAME = $(PACKAGE_TARNAME)-$(PACKAGE_VERSION)-doc
 docsdir = $(docdir)-$(MAJOR_NR).$(MINOR_NR)
-docs_DATA = $(top_builddir)/LICENSE $(top_builddir)/CHANGES
+docs_DATA = $(top_builddir)/LICENSE
 dist_man1_MANS = \
 man/man1/image_to_j2k.1 \
 man/man1/j2k_dump.1 \
