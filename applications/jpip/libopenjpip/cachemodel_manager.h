@@ -1,5 +1,5 @@
 /*
- * $Id: cachemodel_manager.h 1349 2012-01-30 08:44:05Z mathieu.malaterre $
+ * $Id: cachemodel_manager.h 1481 2012-03-02 08:44:04Z mathieu.malaterre $
  *
  * Copyright (c) 2002-2011, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2011, Professor Benoit Macq
@@ -57,7 +57,7 @@ typedef struct cachemodellist_param{
  *
  * @return pointer to the generated cache model list
  */
-cachemodellist_param_t * gene_cachemodellist();
+cachemodellist_param_t * gene_cachemodellist(void);
 
 /**
  * generate a cache model under a list

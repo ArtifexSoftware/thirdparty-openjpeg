@@ -1,5 +1,5 @@
 /*
- * $Id: sock_manager.c 1347 2012-01-30 08:17:43Z mathieu.malaterre $
+ * $Id: sock_manager.c 1736 2012-07-29 15:21:39Z mathieu.malaterre@gmail.com $
  *
  * Copyright (c) 2002-2011, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
  * Copyright (c) 2002-2011, Professor Benoit Macq
@@ -34,6 +34,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#ifdef __FreeBSD__
+#include <netinet/in.h>
+#endif
+#include <unistd.h>
 #endif
 
 #include <stdio.h>
@@ -48,7 +52,7 @@
 #define FCGI_stdout stdout
 #define FCGI_stderr stderr
 #define logstream stderr
-#endif //SERVER
+#endif /*SERVER*/
 
 SOCKET open_listeningsocket( int port)
 {

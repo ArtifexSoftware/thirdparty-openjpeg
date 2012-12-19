@@ -1,9 +1,8 @@
 /*
- * $Id: marker_manager.c 44 2011-02-15 12:32:29Z kaori $
+ * $Id: mainpage.dox.cmake 2011-09-21 Mickael Savinaud $
  *
  * Copyright (c) 2002-2011, Communications and Remote Sensing Laboratory, Universite catholique de Louvain (UCL), Belgium
- * Copyright (c) 2002-2011, Professor Benoit Macq
- * Copyright (c) 2010-2011, Kaori Hagihara
+ * Copyright (c) 2011, Mickael Savinaud, Communications & Systemes <mickael.savinaud@c-s.fr>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,42 +26,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "marker_manager.h"
-
-#ifdef SERVER
-#include "fcgi_stdio.h"
-#define logstream FCGI_stdout
-#else
-#define FCGI_stdout stdout
-#define FCGI_stderr stderr
-#define logstream stderr
-#endif /*SERVER */
-
-marker_param_t set_marker( codestream_param_t cs, Byte2_t code, Byte8_t offset, Byte2_t length)
-{
-  marker_param_t mkr;
-
-  mkr.cs = cs;
-  mkr.code = code;
-  mkr.offset = offset;
-  mkr.length = length;
-
-  return mkr;
-}
-
-
-Byte_t fetch_marker1byte( marker_param_t marker, long offset)
-{
-  return fetch_codestream1byte( &(marker.cs), marker.offset+offset);
-}
-
-Byte2_t fetch_marker2bytebigendian( marker_param_t marker, long offset)
-{
-  return fetch_codestream2bytebigendian( &(marker.cs), marker.offset+offset);
-}
-
-Byte4_t fetch_marker4bytebigendian( marker_param_t marker, long offset)
-{
-  return fetch_codestream4bytebigendian( &(marker.cs), marker.offset+offset);
-}
+ 
+/*! \mainpage OpenJPEG v@OPENJPEG_VERSION@ Documentation
+*
+* \section intro Introduction
+* This manual documents the low-level OpenJPEG C API.\n
+* The OpenJPEG library is an open-source JPEG 2000 library developed in order to promote the use of JPEG 2000.\n
+* This documents is focused on the main part of the library which try to implement Part 1 and Part 2 of the JPEG2000 norm.\n 
+*
+* \section home Home page
+*
+* The Home Page of the OpenJPEG library can be found at:
+*
+* http://code.google.com/p/openjpeg/
+* 
+* More information about the OpenJPEG library is available here:
+*
+* http://www.openjpeg.org/
+* 
+* The OpenJPEG mailing list is located here:
+* 
+* http://groups.google.com/group/openjpeg
+* 
+* All the source code is online and can be retrieved using svn from here:
+* 
+* http://openjpeg.googlecode.com/svn/
+*
+* \section license License
+* This software is released under the BSD license, anybody can use or modify the library, even for commercial applications.\n
+* The only restriction is to retain the copyright in the sources or the binaries documentation.\n
+* Neither the author, nor the university accept any responsibility for any kind of error or data loss which may occur during usage.
+*
+* \author OpenJPEG Team
+*
+*/

@@ -43,7 +43,7 @@
 #endif /*SERVER*/
 
 
-metadatalist_param_t * gene_metadatalist()
+metadatalist_param_t * gene_metadatalist(void)
 {
   metadatalist_param_t *list;
 
@@ -77,10 +77,6 @@ metadatalist_param_t * const_metadatalist( int fd)
   phldlist = gene_placeholderlist();
   metadatalist = gene_metadatalist();
 
-  delete_box_in_list_by_type( "iptr", toplev_boxlist);
-  delete_box_in_list_by_type( "cidx", toplev_boxlist);
-  delete_box_in_list_by_type( "fidx", toplev_boxlist);
-  
   box = toplev_boxlist->first;
   idx = 0;
   while( box){
