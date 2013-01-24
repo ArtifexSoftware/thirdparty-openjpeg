@@ -3972,6 +3972,7 @@ OPJ_BOOL opj_j2k_read_sot ( opj_j2k_t *p_j2k,
                                         return OPJ_FALSE;
                                 }
                         }
+			++l_num_parts;
                         l_tcp->m_nb_tile_parts = l_num_parts;
                 }
 
