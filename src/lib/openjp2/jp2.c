@@ -1003,6 +1003,13 @@ void opj_jp2_apply_cdef(opj_image_t *image, opj_jp2_color_t *color)
 		cn = info[i].cn; 
         acn = asoc - 1;
 
+		/* testcase 4149.pdf.SIGSEGV.cf7.3501 */
+		if (cn != acn && (cn >= image->numcomps || acn >= image->numcomps)) {
+			/* TODO: is there a better place to validate these indices? */
+			fprintf(stderr, "invalid component index %d/%d\n", cn, acn);
+			cn = acn = 0;
+		}
+
 		if(cn != acn)
 		{
 			opj_image_comp_t saved;
