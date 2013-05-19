@@ -960,6 +960,13 @@ OPJ_BOOL opj_jp2_read_cmap(	opj_jp2_t * jp2,
 		opj_read_bytes(p_cmap_header_data, &l_value, 1);			/* PCOL^i */
 		++p_cmap_header_data;
 		cmap[i].pcol = (OPJ_BYTE) l_value;
+
+		/* testcase 451.pdf.SIGSEGV.5b5.3723 */
+		if (cmap[i].pcol >= nr_channels) {
+			opj_event_msg(p_manager, EVT_ERROR, "Invalid palette index %d.\n", l_value);
+			opj_free(cmap);
+			return OPJ_FALSE;
+		}
 	}
 
 	jp2->color.jp2_pclr->cmap = cmap;
