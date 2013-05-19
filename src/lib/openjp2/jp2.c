@@ -776,6 +776,13 @@ void opj_jp2_apply_pclr(opj_image_t *image, opj_jp2_color_t *color)
 	for(i = 0; i < nr_channels; ++i) {
 		pcol = cmap[i].pcol; cmp = cmap[i].cmp;
 
+		/* testcase 451.pdf.SIGSEGV.f4c.3723 */
+		if (cmp >= image->numcomps) {
+			/* TODO: is there a better place to validate the channel index? */
+			fprintf(stderr, "invalid channel index %d\n", cmp);
+			cmp = 0;
+		}
+
 		new_comps[pcol] = old_comps[cmp];
 
 		/* Direct use */
@@ -798,6 +805,12 @@ void opj_jp2_apply_pclr(opj_image_t *image, opj_jp2_color_t *color)
 
 		/* Palette mapping: */
 		cmp = cmap[i].cmp; pcol = cmap[i].pcol;
+		/* testcase 451.pdf.SIGSEGV.f4c.3723 */
+		if (cmp >= image->numcomps) {
+			/* TODO: is there a better place to validate the channel index? */
+			fprintf(stderr, "invalid channel index %d\n", cmp);
+			cmp = 0;
+		}
 		src = old_comps[cmp].data;
 		dst = new_comps[pcol].data;
 		max = new_comps[pcol].w * new_comps[pcol].h;
