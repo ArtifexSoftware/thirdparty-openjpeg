@@ -3973,6 +3973,13 @@ OPJ_BOOL opj_j2k_read_sot ( opj_j2k_t *p_j2k,
                 opj_read_bytes(p_header_data,&l_num_parts ,1);          /* TNsot */
                 ++p_header_data;
 
+                /* testcase 451.pdf.SIGSEGV.ce9.3723 */
+                if (l_num_parts && l_current_part >= l_num_parts) {
+                        opj_event_msg(p_manager, EVT_ERROR, "In SOT marker, TPSot (%d) is not valid regards to TNsot (%d), giving up\n", l_current_part, l_num_parts);
+                        p_j2k->m_specific_param.m_decoder.m_last_tile_part = 1;
+                        return OPJ_FALSE;
+                }
+
                 if (l_num_parts != 0) { /* Number of tile-part header is provided by this tile-part header */
                         /* Useful to manage the case of textGBR.jp2 file because two values of TNSot are allowed: the correct numbers of
                          * tile-parts for that tile and zero (A.4.2 of 15444-1 : 2002). */
