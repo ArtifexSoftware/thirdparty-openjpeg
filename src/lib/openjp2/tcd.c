@@ -674,6 +674,12 @@ OPJ_BOOL FUNCTION (     opj_tcd_t *p_tcd,                        \
                 l_tilec->y0 = opj_int_ceildiv(l_tile->y0, l_image_comp->dy);                                                                                                                                          \
                 l_tilec->x1 = opj_int_ceildiv(l_tile->x1, l_image_comp->dx);                                                                                                                                          \
                 l_tilec->y1 = opj_int_ceildiv(l_tile->y1, l_image_comp->dy);                                                                                                                                          \
+                /* testcase 1336.pdf.asan.47.376 */ \
+                if (compno > 0 && (l_tilec->x1 - l_tilec->x0 != l_tile->comps->x1 - l_tile->comps->x0) || \
+                                  (l_tilec->y1 - l_tilec->y0 != l_tile->comps->y1 - l_tile->comps->y0)) { \
+                    fprintf(stderr, "tiles don't all have the same dimension: %d x %d and %d x %d", l_tilec->x1 - l_tilec->x0, l_tilec->y1 - l_tilec->y0, l_tile->comps->x1 - l_tile->comps->x0, l_tile->comps->y1 - l_tile->comps->y0); \
+                    return OPJ_FALSE; \
+                } \
                 /*fprintf(stderr, "\tTile compo border = %d,%d,%d,%d\n", l_tilec->x0, l_tilec->y0,l_tilec->x1,l_tilec->y1);*/                                                                                     \
                                                                     \
                 l_data_size = (l_tilec->x1 - l_tilec->x0)           \
