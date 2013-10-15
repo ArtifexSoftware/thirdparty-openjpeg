@@ -1126,7 +1126,8 @@ OPJ_BOOL opj_jp2_read_colr( opj_jp2_t *jp2,
 	if (jp2->meth == 1) {
 		if (p_colr_header_size != 7) {
 			opj_event_msg(p_manager, EVT_ERROR, "Bad BPCC header box (bad size)\n");
-			return OPJ_FALSE;
+			if (p_colr_header_size < 7)
+				return OPJ_FALSE;
 		}
 
 		opj_read_bytes(p_colr_header_data,&jp2->enumcs ,4);			/* EnumCS */
