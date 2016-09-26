@@ -36,7 +36,7 @@
 #include "opj_includes.h"
 
 
-/* 
+/*
  * Write faix box of phix
  *
  * @param[in] coff      offset of j2k codestream
@@ -57,19 +57,21 @@ int opj_write_phix( int coff, opj_codestream_info_t cstr_info, OPJ_BOOL EPHused,
   OPJ_OFF_T lenp = 0;
 
   box = (opj_jp2_box_t *)opj_calloc( (size_t)cstr_info.numcomps, sizeof(opj_jp2_box_t));
-  
+  if(box == NULL){
+		return 0;
+  }
   for( i=0;i<2;i++){
     if (i)
       opj_stream_seek( cio, lenp, p_manager);
-      
+
     lenp = opj_stream_tell(cio);
     opj_stream_skip(cio, 4, p_manager);         /* L [at the end]      */
     opj_write_bytes(l_data_header,JPIP_PHIX,4); /* PHIX */
     opj_stream_write_data(cio,l_data_header,4,p_manager);
-      
+
     opj_write_manf( (int)i, cstr_info.numcomps, box, cio, p_manager );
 
-    for( compno=0; compno<(OPJ_UINT32)cstr_info.numcomps; compno++){       
+    for( compno=0; compno<(OPJ_UINT32)cstr_info.numcomps; compno++){
       box[compno].length = (OPJ_UINT32)opj_write_phixfaix( coff, (int)compno, cstr_info, EPHused, j2klen, cio,p_manager);
       box[compno].type = JPIP_FAIX;
     }
@@ -123,15 +125,15 @@ int opj_write_phixfaix( int coff, int compno, opj_codestream_info_t cstr_info, O
   nmax = 0;
   for( i=0; i<=(OPJ_UINT32)cstr_info.numdecompos[compno]; i++)
     nmax += (OPJ_UINT32)(cstr_info.tile[0].ph[i] * cstr_info.tile[0].pw[i] * cstr_info.numlayers);
-  
+
   opj_write_bytes(l_data_header,nmax,size_of_coding);         /* NMAX           */
   opj_stream_write_data(cio,l_data_header,size_of_coding,p_manager);
   opj_write_bytes(l_data_header,(OPJ_UINT32)(cstr_info.tw*cstr_info.th),size_of_coding);  /* M              */
   opj_stream_write_data(cio,l_data_header,size_of_coding,p_manager);
-  
+
   for( tileno=0; tileno<(OPJ_UINT32)(cstr_info.tw*cstr_info.th); tileno++){
     tile_Idx = &cstr_info.tile[ tileno];
-    
+
     num_packet = 0;
     numOfres = cstr_info.numdecompos[compno] + 1;
 
@@ -140,7 +142,7 @@ int opj_write_phixfaix( int coff, int compno, opj_codestream_info_t cstr_info, O
       for( precno=0; precno<numOfprec; precno++){
 	numOflayers = cstr_info.numlayers;
 	for( layno=0; layno<numOflayers; layno++){
-	  
+
 	  switch ( cstr_info.prog){
 	  case OPJ_LRCP:
 	    packet = tile_Idx->packet[ ((layno*numOfres+resno)*cstr_info.numcomps+compno)*numOfprec+precno];
@@ -165,7 +167,7 @@ int opj_write_phixfaix( int coff, int compno, opj_codestream_info_t cstr_info, O
     opj_stream_write_data(cio,l_data_header,size_of_coding,p_manager);
     opj_write_bytes(l_data_header,(OPJ_UINT32)(packet.end_ph_pos-packet.start_pos+1),size_of_coding); /* length         */
     opj_stream_write_data(cio,l_data_header,size_of_coding,p_manager);
-	  
+
 	  num_packet++;
 	}
       }

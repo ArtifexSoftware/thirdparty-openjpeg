@@ -1,6 +1,6 @@
  /*
- * The copyright in this software is being made available under the 2-clauses 
- * BSD License, included below. This software may be subject to other third 
+ * The copyright in this software is being made available under the 2-clauses
+ * BSD License, included below. This software may be subject to other third
  * party and contributor rights, including patent rights, and no such rights
  * are granted under this license.
  *
@@ -8,13 +8,13 @@
  * Copyright (c) 2002-2014, Professor Benoit Macq
  * Copyright (c) 2001-2003, David Janssens
  * Copyright (c) 2002-2003, Yannick Verschueren
- * Copyright (c) 2003-2007, Francois-Olivier Devaux 
+ * Copyright (c) 2003-2007, Francois-Olivier Devaux
  * Copyright (c) 2003-2014, Antonin Descampe
  * Copyright (c) 2005, Herve Drolon, FreeImage Team
  * Copyright (c) 2006-2007, Parvatha Elangovan
  * Copyright (c) 2008, Jerome Fimes, Communications & Systemes <jerome.fimes@c-s.fr>
  * Copyright (c) 2010-2011, Kaori Hagihara
- * Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France 
+ * Copyright (c) 2011-2012, Centre National d'Etudes Spatiales (CNES), France
  * Copyright (c) 2012, CS Systemes d'Information, France
  * All rights reserved.
  *
@@ -43,15 +43,15 @@
 #define OPENJPEG_H
 
 
-/* 
+/*
 ==========================================================
    Compiler directives
 ==========================================================
 */
 
 /*
-The inline keyword is supported by C99 but not by C90. 
-Most compilers implement their own version of this keyword ... 
+The inline keyword is supported by C99 but not by C90.
+Most compilers implement their own version of this keyword ...
 */
 #ifndef INLINE
 	#if defined(_MSC_VER)
@@ -60,9 +60,9 @@ Most compilers implement their own version of this keyword ...
 		#define INLINE __inline__
 	#elif defined(__MWERKS__)
 		#define INLINE inline
-	#else 
+	#else
 		/* add other compilers here ... */
-		#define INLINE 
+		#define INLINE
 	#endif /* defined(<Compiler>) */
 #endif /* INLINE */
 
@@ -78,29 +78,33 @@ Most compilers implement their own version of this keyword ...
 
 #if defined(OPJ_STATIC) || !defined(_WIN32)
 /* http://gcc.gnu.org/wiki/Visibility */
-#if __GNUC__ >= 4
-#define OPJ_API    __attribute__ ((visibility ("default")))
-#define OPJ_LOCAL  __attribute__ ((visibility ("hidden")))
+#	if __GNUC__ >= 4
+#		if defined(OPJ_STATIC) /* static library uses "hidden" */
+#			define OPJ_API    __attribute__ ((visibility ("hidden")))
+#		else
+#			define OPJ_API    __attribute__ ((visibility ("default")))
+#		endif
+#		define OPJ_LOCAL  __attribute__ ((visibility ("hidden")))
+#	else
+#		define OPJ_API
+#		define OPJ_LOCAL
+#	endif
+#	define OPJ_CALLCONV
 #else
-#define OPJ_API
-#define OPJ_LOCAL
-#endif
-#define OPJ_CALLCONV
-#else
-#define OPJ_CALLCONV __stdcall
+#	define OPJ_CALLCONV __stdcall
 /*
-The following ifdef block is the standard way of creating macros which make exporting 
+The following ifdef block is the standard way of creating macros which make exporting
 from a DLL simpler. All files within this DLL are compiled with the OPJ_EXPORTS
 symbol defined on the command line. this symbol should not be defined on any project
-that uses this DLL. This way any other project whose source files include this file see 
-OPJ_API functions as being imported from a DLL, wheras this DLL sees symbols
+that uses this DLL. This way any other project whose source files include this file see
+OPJ_API functions as being imported from a DLL, whereas this DLL sees symbols
 defined with this macro as being exported.
 */
-#if defined(OPJ_EXPORTS) || defined(DLL_EXPORT)
-#define OPJ_API __declspec(dllexport)
-#else
-#define OPJ_API __declspec(dllimport)
-#endif /* OPJ_EXPORTS */
+#	if defined(OPJ_EXPORTS) || defined(DLL_EXPORT)
+#		define OPJ_API __declspec(dllexport)
+#	else
+#		define OPJ_API __declspec(dllimport)
+#	endif /* OPJ_EXPORTS */
 #endif /* !OPJ_STATIC || !_WIN32 */
 
 typedef int OPJ_BOOL;
@@ -131,7 +135,7 @@ typedef size_t   OPJ_SIZE_T;
 /* Avoid compile-time warning because parameter is not used */
 #define OPJ_ARG_NOT_USED(x) (void)(x)
 
-/* 
+/*
 ==========================================================
    Useful constant definitions
 ==========================================================
@@ -229,7 +233,7 @@ typedef size_t   OPJ_SIZE_T;
 #define OPJ_CINEMA_24_COMP   1041666    /** Maximum size per color component for 2K & 4K @ 24fps */
 #define OPJ_CINEMA_48_COMP   520833		/** Maximum size per color component for 2K @ 48fps */
 
-/* 
+/*
 ==========================================================
    enum definitions
 ==========================================================
@@ -257,7 +261,7 @@ typedef enum CINEMA_MODE {
     OPJ_CINEMA4K_24 = 3		/** 4K Digital Cinema at 24 fps*/
 }OPJ_CINEMA_MODE;
 
-/** 
+/**
  * Progression order
  * */
 typedef enum PROG_ORDER {
@@ -295,7 +299,7 @@ typedef enum CODEC_FORMAT {
 } OPJ_CODEC_FORMAT;
 
 
-/* 
+/*
 ==========================================================
    event manager typedef definitions
 ==========================================================
@@ -304,11 +308,11 @@ typedef enum CODEC_FORMAT {
 /**
  * Callback function prototype for events
  * @param msg               Event message
- * @param client_data       Client object where will be return the event message 
+ * @param client_data       Client object where will be return the event message
  * */
 typedef void (*opj_msg_callback) (const char *msg, void *client_data);
 
-/* 
+/*
 ==========================================================
    codec typedef definitions
 ==========================================================
@@ -316,7 +320,7 @@ typedef void (*opj_msg_callback) (const char *msg, void *client_data);
 
 /**
  * Progression order changes
- * 
+ *
  */
 typedef struct opj_poc {
 	/** Resolution num start, Component num start, given by POC */
@@ -481,7 +485,7 @@ typedef struct opj_cparameters {
 	char tcp_mct;
 	/** Enable JPIP indexing*/
 	OPJ_BOOL jpip_on;
-	/** Naive implementation of MCT restricted to a single reversible array based 
+	/** Naive implementation of MCT restricted to a single reversible array based
         encoding without offset concerning all the components. */
 	void * mct_data;
     /**
@@ -494,7 +498,7 @@ typedef struct opj_cparameters {
     /** RSIZ value
         To be used to combine OPJ_PROFILE_*, OPJ_EXTENSION_* and (sub)levels values. */
     OPJ_UINT16 rsiz;
-} opj_cparameters_t;  
+} opj_cparameters_t;
 
 #define OPJ_DPARAMETERS_IGNORE_PCLR_CMAP_CDEF_FLAG	0x0001
 
@@ -502,19 +506,19 @@ typedef struct opj_cparameters {
  * Decompression parameters
  * */
 typedef struct opj_dparameters {
-	/** 
-	Set the number of highest resolution levels to be discarded. 
-	The image resolution is effectively divided by 2 to the power of the number of discarded levels. 
+	/**
+	Set the number of highest resolution levels to be discarded.
+	The image resolution is effectively divided by 2 to the power of the number of discarded levels.
 	The reduce factor is limited by the smallest total number of decomposition levels among tiles.
-	if != 0, then original dimension divided by 2^(reduce); 
-	if == 0 or not used, image is decoded to the full resolution 
+	if != 0, then original dimension divided by 2^(reduce);
+	if == 0 or not used, image is decoded to the full resolution
 	*/
 	OPJ_UINT32 cp_reduce;
-	/** 
-	Set the maximum number of quality layers to decode. 
+	/**
+	Set the maximum number of quality layers to decode.
 	If there are less quality layers than the specified number, all the quality layers are decoded.
-	if != 0, then only the first "layer" layers are decoded; 
-	if == 0 or not used, all the quality layers are decoded 
+	if != 0, then only the first "layer" layers are decoded;
+	if == 0 or not used, all the quality layers are decoded
 	*/
 	OPJ_UINT32 cp_layer;
 
@@ -569,7 +573,7 @@ typedef struct opj_dparameters {
  * */
 typedef void * opj_codec_t;
 
-/* 
+/*
 ==========================================================
    I/O stream typedef definitions
 ==========================================================
@@ -613,7 +617,7 @@ typedef void (* opj_stream_free_user_data_fn) (void * p_user_data) ;
  */
 typedef void * opj_stream_t;
 
-/* 
+/*
 ==========================================================
    image typedef definitions
 ==========================================================
@@ -651,7 +655,7 @@ typedef struct opj_image_comp {
   OPJ_UINT16 alpha;
 } opj_image_comp_t;
 
-/** 
+/**
  * Defines image data and characteristics
  * */
 typedef struct opj_image {
@@ -701,7 +705,7 @@ typedef struct opj_image_comptparm {
 } opj_image_cmptparm_t;
 
 
-/* 
+/*
 ==========================================================
    Information on the JPEG 2000 codestream
 ==========================================================
@@ -846,7 +850,7 @@ typedef struct opj_codestream_info {
 } opj_codestream_info_t;
 
 /* <----------------------------------------------------------- */
-/* new output managment of the codestream information and index */
+/* new output management of the codestream information and index */
 
 /**
  * Tile-component coding parameters information
@@ -1041,7 +1045,7 @@ extern "C" {
 #endif
 
 
-/* 
+/*
 ==========================================================
    openjpeg version
 ==========================================================
@@ -1050,7 +1054,7 @@ extern "C" {
 /* Get the version of the openjpeg library*/
 OPJ_API const char * OPJ_CALLCONV opj_version(void);
 
-/* 
+/*
 ==========================================================
    image functions definitions
 ==========================================================
@@ -1084,7 +1088,7 @@ OPJ_API void OPJ_CALLCONV opj_image_destroy(opj_image_t *image);
 */
 OPJ_API opj_image_t* OPJ_CALLCONV opj_image_tile_create(OPJ_UINT32 numcmpts, opj_image_cmptparm_t *cmptparms, OPJ_COLOR_SPACE clrspc);
 
-/* 
+/*
 ==========================================================
    stream functions definitions
 ==========================================================
@@ -1116,7 +1120,7 @@ OPJ_API opj_stream_t* OPJ_CALLCONV opj_stream_create(OPJ_SIZE_T p_buffer_size, O
  * @param	p_stream	the stream to destroy.
  */
 OPJ_API void OPJ_CALLCONV opj_stream_destroy(opj_stream_t* p_stream);
- 
+
 /**
  * Sets the given function to be used as a read function.
  * @param		p_stream	the stream to modify
@@ -1167,7 +1171,7 @@ OPJ_API void OPJ_CALLCONV opj_stream_set_user_data_length(opj_stream_t* p_stream
  * @param p_is_read_stream  whether the stream is a read stream (true) or not (false)
 */
 OPJ_API opj_stream_t* OPJ_CALLCONV opj_stream_create_default_file_stream (const char *fname, OPJ_BOOL p_is_read_stream);
- 
+
 /** Create a stream from a file identified with its filename with a specific buffer size
  * @param fname             the filename of the file to stream
  * @param p_buffer_size     size of the chunk used to stream
@@ -1176,8 +1180,8 @@ OPJ_API opj_stream_t* OPJ_CALLCONV opj_stream_create_default_file_stream (const 
 OPJ_API opj_stream_t* OPJ_CALLCONV opj_stream_create_file_stream (const char *fname,
                                                                      OPJ_SIZE_T p_buffer_size,
                                                                      OPJ_BOOL p_is_read_stream);
- 
-/* 
+
+/*
 ==========================================================
    event manager functions definitions
 ==========================================================
@@ -1188,7 +1192,7 @@ OPJ_API opj_stream_t* OPJ_CALLCONV opj_stream_create_file_stream (const char *fn
  * @param p_callback    the callback function which will be used
  * @param p_user_data   client object where will be returned the message
 */
-OPJ_API OPJ_BOOL OPJ_CALLCONV opj_set_info_handler(opj_codec_t * p_codec, 
+OPJ_API OPJ_BOOL OPJ_CALLCONV opj_set_info_handler(opj_codec_t * p_codec,
                                                    opj_msg_callback p_callback,
                                                    void * p_user_data);
 /**
@@ -1206,11 +1210,11 @@ OPJ_API OPJ_BOOL OPJ_CALLCONV opj_set_warning_handler(opj_codec_t * p_codec,
  * @param p_callback    the callback function which will be used
  * @param p_user_data   client object where will be returned the message
 */
-OPJ_API OPJ_BOOL OPJ_CALLCONV opj_set_error_handler(opj_codec_t * p_codec, 
+OPJ_API OPJ_BOOL OPJ_CALLCONV opj_set_error_handler(opj_codec_t * p_codec,
                                                     opj_msg_callback p_callback,
                                                     void * p_user_data);
 
-/* 
+/*
 ==========================================================
    codec functions definitions
 ==========================================================
@@ -1257,6 +1261,25 @@ OPJ_API void OPJ_CALLCONV opj_set_default_decoder_parameters(opj_dparameters_t *
  */
 OPJ_API OPJ_BOOL OPJ_CALLCONV opj_setup_decoder(opj_codec_t *p_codec,
 												opj_dparameters_t *parameters );
+
+/**
+ * Allocates worker threads for the compressor/decompressor.
+ *
+ * By default, only the main thread is used. If this function is not used,
+ * but the OPJ_NUM_THREADS environment variable is set, its value will be
+ * used to initialize the number of threads. The value can be either an integer
+ * number, or "ALL_CPUS". If OPJ_NUM_THREADS is set and this function is called,
+ * this function will override the behaviour of the environment variable.
+ *
+ * Note: currently only has effect on the decompressor.
+ *
+ * @param p_codec       decompressor handler
+ * @param num_threads   number of threads.
+ *
+ * @return OPJ_TRUE     if the decoder is correctly set
+ */
+OPJ_API OPJ_BOOL OPJ_CALLCONV opj_codec_set_threads(opj_codec_t *p_codec,
+                                                    int num_threads);
 
 /**
  * Decodes an image header.
@@ -1330,7 +1353,7 @@ OPJ_API OPJ_BOOL OPJ_CALLCONV opj_set_decoded_resolution_factor(opj_codec_t *p_c
  * @param	p_codec		        the jpeg2000 codec.
  * @param	p_tile_index		the index of the tile to write. At the moment, the tiles must be written from 0 to n-1 in sequence.
  * @param	p_data				pointer to the data to write. Data is arranged in sequence, data_comp0, then data_comp1, then ... NO INTERLEAVING should be set.
- * @param	p_data_size			this value os used to make sure the data being written is correct. The size must be equal to the sum for each component of 
+ * @param	p_data_size			this value os used to make sure the data being written is correct. The size must be equal to the sum for each component of
  *                              tile_width * tile_height * component_size. component_size can be 1,2 or 4 bytes, depending on the precision of the given component.
  * @param	p_stream			the stream to write data to.
  *
@@ -1343,7 +1366,7 @@ OPJ_API OPJ_BOOL OPJ_CALLCONV opj_write_tile (	opj_codec_t *p_codec,
 												opj_stream_t *p_stream );
 
 /**
- * Reads a tile header. This function is compulsory and allows one to know the size of the tile thta will be decoded.
+ * Reads a tile header. This function is compulsory and allows one to know the size of the tile that will be decoded.
  * The user may need to refer to the image got by opj_read_header to understand the size being taken by the tile.
  *
  * @param	p_codec			the jpeg2000 codec.
@@ -1400,7 +1423,7 @@ OPJ_API OPJ_BOOL OPJ_CALLCONV opj_decode_tile_data(	opj_codec_t *p_codec,
 OPJ_API opj_codec_t* OPJ_CALLCONV opj_create_compress(OPJ_CODEC_FORMAT format);
 
 /**
-Set encoding parameters to default values, that means : 
+Set encoding parameters to default values, that means :
 <ul>
 <li>Lossless
 <li>1 tile
@@ -1428,8 +1451,8 @@ OPJ_API void OPJ_CALLCONV opj_set_default_encoder_parameters(opj_cparameters_t *
  * @param parameters 	Compression parameters
  * @param image 		Input filled image
  */
-OPJ_API OPJ_BOOL OPJ_CALLCONV opj_setup_encoder(opj_codec_t *p_codec, 
-												opj_cparameters_t *parameters, 
+OPJ_API OPJ_BOOL OPJ_CALLCONV opj_setup_encoder(opj_codec_t *p_codec,
+												opj_cparameters_t *parameters,
 												opj_image_t *image);
 
 /**
@@ -1550,6 +1573,19 @@ OPJ_API OPJ_BOOL OPJ_CALLCONV opj_set_MCT( opj_cparameters_t *parameters,
 		                               	   OPJ_INT32 * p_dc_shift,
 		                               	   OPJ_UINT32 pNbComp);
 
+/*
+==========================================================
+   Thread functions
+==========================================================
+*/
+
+/** Returns if the library is built with thread support.
+ * OPJ_TRUE if mutex, condition, thread, thread pool are available.
+ */
+OPJ_API OPJ_BOOL OPJ_CALLCONV opj_has_thread_support(void);
+
+/** Return the number of virtual CPUs */
+OPJ_API int OPJ_CALLCONV opj_get_num_cpus(void);
 
 
 #ifdef __cplusplus
