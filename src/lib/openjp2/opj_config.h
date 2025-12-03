@@ -19,6 +19,19 @@
 #endif
 
 #ifdef OPJ_RENAME_SYMBOLS
+#define j2k_destroy_cstr_index fz_opj_j2k_destroy_cstr_index
+#define j2k_dump fz_opj_j2k_dump
+#define j2k_dump_image_comp_header fz_opj_j2k_dump_image_comp_header
+#define j2k_dump_image_header fz_opj_j2k_dump_image_header
+#define j2k_get_cstr_index fz_opj_j2k_get_cstr_index
+#define j2k_get_cstr_info fz_opj_j2k_get_cstr_info
+#define jp2_dump fz_opj_jp2_dump
+#define jp2_get_cstr_index fz_opj_jp2_get_cstr_index
+#define jp2_get_cstr_info fz_opj_jp2_get_cstr_info
+#define opj_aligned_32_malloc fz_opj_aligned_32_malloc
+#define opj_aligned_free fz_opj_aligned_free
+#define opj_aligned_malloc fz_opj_aligned_malloc
+#define opj_aligned_malloc_n fz_opj_aligned_malloc_n
 #define opj_alloc_tile_component_data fz_opj_alloc_tile_component_data
 #define opj_bio_bytein fz_opj_bio_bytein
 #define opj_bio_byteout fz_opj_bio_byteout
@@ -34,6 +47,7 @@
 #define opj_bio_read fz_opj_bio_read
 #define opj_bio_write fz_opj_bio_write
 #define opj_calculate_norms fz_opj_calculate_norms
+#define opj_calloc fz_opj_calloc
 #define opj_close_from_file fz_opj_close_from_file
 #define opj_codec_set_threads fz_opj_codec_set_threads
 #define opj_cond_create fz_opj_cond_create
@@ -93,6 +107,7 @@
 #define opj_end_compress fz_opj_end_compress
 #define opj_end_decompress fz_opj_end_decompress
 #define opj_event_msg fz_opj_event_msg
+#define opj_free fz_opj_free
 #define opj_get_all_encoding_parameters fz_opj_get_all_encoding_parameters
 #define opj_get_cstr_index fz_opj_get_cstr_index
 #define opj_get_cstr_info fz_opj_get_cstr_info
@@ -358,6 +373,7 @@
 #define opj_lupDecompose fz_opj_lupDecompose
 #define opj_lupInvert fz_opj_lupInvert
 #define opj_lupSolve fz_opj_lupSolve
+#define opj_malloc fz_opj_malloc
 #define opj_matrix_inversion_f fz_opj_matrix_inversion_f
 #define opj_mct_decode fz_opj_mct_decode
 #define opj_mct_decode_custom fz_opj_mct_decode_custom
@@ -429,6 +445,7 @@
 #define opj_read_from_file fz_opj_read_from_file
 #define opj_read_header fz_opj_read_header
 #define opj_read_tile_header fz_opj_read_tile_header
+#define opj_realloc fz_opj_realloc
 #define opj_seek_from_file fz_opj_seek_from_file
 #define opj_set_MCT fz_opj_set_MCT
 #define opj_set_decode_area fz_opj_set_decode_area
@@ -624,6 +641,7 @@
 #define opj_write_float_LE fz_opj_write_float_LE
 #define opj_write_from_file fz_opj_write_from_file
 #define opj_write_tile fz_opj_write_tile
+#define opq_mqc_finish_dec fz_opj_opq_mqc_finish_dec
 #endif
 
 #endif
